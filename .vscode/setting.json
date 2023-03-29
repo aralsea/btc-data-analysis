@@ -1,0 +1,49 @@
+{
+    "workbench.colorTheme": "Default Dark+",
+    "terminal.integrated.scrollback": 100000,
+    "extensions.ignoreRecommendations": false,
+    "editor.formatOnSave": true,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "[json]": {
+        "editor.formatOnSave": true
+    },
+    "python.linting.enabled": true,
+    "python.linting.lintOnSave": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Args": [
+        "--max-line-length=88",
+        "--ignore=E203,W503,W504"
+    ],
+    "python.linting.mypyEnabled": true,
+    "python.linting.mypyArgs": [
+        "--follow-imports-silent",
+        "--show-column-numbers",
+        "--check-untyped-defs",
+        "--namespace-packages",
+        "--ignore-missing-imports"
+    ],
+    "mypy.configFile": ".vscode/mypy.ini",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": true,
+        "editor.tabSize": 4,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+            "source.fixAll": true
+        },
+    },
+    "black-formatter.args": [
+        "--line-length=88"
+    ],
+    "isort.args": [
+        "--profile",
+        "black"
+    ],
+    "black-formatter.importStrategy": "fromEnvironment",
+    "isort.importStrategy": "fromEnvironment",
+}
