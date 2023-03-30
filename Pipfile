@@ -5,6 +5,9 @@ name = "pypi"
 
 [packages]
 pybotters = "*"
+mypy = "*"
+requests = "*"
+pandas = "*"
 
 [dev-packages]
 mypy = "*"
