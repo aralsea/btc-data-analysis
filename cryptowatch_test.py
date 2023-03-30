@@ -1,22 +1,25 @@
-from datetime import datetime
+import datetime as dt
 
 import requests
 
 # cf. https://ryota-trade.com/?p=952
 
-# CryptowatchのAPIで１分足を取得
-response = requests.get("https://api.cryptowat.ch/markets/bitflyer/btcfxjpy/ohlc?periods=60")
+periods = 900  # 15分足: 900, 日足: 86400
+length = 1000  # データの取得件数, <=6000 (一度に6000件までしか取得できない)
+
+before = dt.datetime.now()
+after = before - dt.timedelta(seconds=periods*length)
+
+# UNIXに直す
+response = requests.get(f"https://api.cryptowat.ch/markets/bitflyer/btcjpy/ohlc?periods={periods}&before={int(before.timestamp())}&after={int(after.timestamp())}")
 response = response.json()
 
-# 最後から２番目のローソク足を取り出す
-data = response["result"]["60"][-2]
-print(data)
+# response = {"result": {"900": [[...], [...], ]}}
+data = response["result"][f"{periods}"]
 
-# ローソク足から日時・始値・終値を取り出す
-close_time = datetime.fromtimestamp(data[0]).strftime('%Y/%m/%d %H:%M')
-open_price = data[1]
-close_price = data[4]
+# len(data) = length 
+print(len(data))
+# data[i] = [unixtime, o, h, l, c, volume, quotevolume]
+print(dt.datetime.fromtimestamp(data[0][0]))
+print(dt.datetime.fromtimestamp(data[-1][0]))
 
-print( "時間： " + close_time
-	+ " 始値： " + str(open_price)
-	+ " 終値： " + str(close_price) )
