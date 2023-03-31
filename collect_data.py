@@ -1,11 +1,12 @@
 import datetime as dt
 import os
+from typing import List
 
 import pandas as pd
 import requests
 
 
-def get_data(periods: int, before: dt.datetime, after: dt.datetime) -> list[list]:
+def get_data(periods: int, before: dt.datetime, after: dt.datetime) -> List[list]:
     """cryptowatchからデータを取得する.
 
     Args:
@@ -95,9 +96,11 @@ def add_data(periods: int) -> None:
     old_df = pd.read_csv(save_path)
     # csvファイル上の最新の時刻(+periods)から現時点までのデータを取得
     before = dt.datetime.now()
-    after = dt.datetime.fromtimestamp(old_df["CloseTime"][-1]) + dt.timedelta(
+    after = dt.datetime.fromtimestamp(old_df["CloseTime"].values[-1]) + dt.timedelta(
         seconds=periods
     )
+    print(before)
+    print(after)
 
     # データ取得
     data = get_data(periods, before, after)
