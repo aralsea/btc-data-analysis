@@ -4,10 +4,18 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pandas = "*"
 mypy = "*"
+numpy = "*"
+pandas = "*"
+requests = "*"
+pybotters = "*"
+pandas-ta = "*"
+matplotlib = "*"
+japanize-matplotlib = "*"
 
 [dev-packages]
+ipykernel = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.11"
+python_full_version = "3.11.2"

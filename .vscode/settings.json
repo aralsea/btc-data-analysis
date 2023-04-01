@@ -42,6 +42,8 @@
     ],
     "cSpell.words": [
         "cryptowatch",
+        "matplotlib",
+        "pyplot",
         "unixtime"
     ]
 }
