@@ -1,25 +1,30 @@
-import asyncio
+import datetime
+import random
+import time
+from typing import Union
 
-import pybotters
-
-apis = {
-    "bitflyer": ["BITFLYER_API_KEY", "BITFLYER_API_SECRET"],
-}
-
-
-async def main():
-    async with pybotters.Client(
-        apis=apis, base_url="https://api.bitflyer.com"
-    ) as client:
-        # REST API
-        resp = await client.get(
-            "/v1/getexecutions", params={"count": "1000", "before": "2452669860"}
-        )
-        data = await resp.json()
-        print(data)
+import numpy as np
 
 
-try:
-    asyncio.run(main())
-except KeyboardInterrupt:
-    pass
+def test_strategy() -> dict[str, Union[str, float]]:
+    signals = ["buy", "sell"]
+    amounts = np.arange(0.1, 1.0, 0.1)
+    flag: dict[str, Union[str, float]] = {
+        "signal": random.choice(signals),
+        "amount": random.choice(amounts),
+    }
+    return flag
+
+
+if __name__ == "__main__":
+    try:
+        while True:
+            flag = test_strategy()
+            print(
+                f"{datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')}"
+                f" : {flag.get('signal')}"
+                f" {flag.get('amount'):.2f} BTC"
+            )
+            time.sleep(5)
+    except KeyboardInterrupt:
+        exit()
