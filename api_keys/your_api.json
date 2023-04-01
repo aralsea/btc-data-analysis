@@ -1,0 +1,6 @@
+{
+    "bitflyer": [
+        "YOUR_BITFLYER_API_KEY",
+        "YOUR_BITFLYER_API_SECRET"
+    ],
+}

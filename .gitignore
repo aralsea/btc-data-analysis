@@ -162,3 +162,6 @@ cython_debug/
 __pycache__
 .pytest_cache
 **/.DS_Store
+
+# API files
+api_keys/hayato_api.json
