@@ -1,9 +1,10 @@
-import datetime
-from typing import Any, NamedTuple, Optional, Union
+import random
+from typing import Any, Literal, NamedTuple, Optional, Union
 
 import pandas as pd
 
 INITIAL_CASH = 1000000  # 100万円
+Side = Literal["BUY", "SELL"]
 
 
 class Tick(NamedTuple):
@@ -21,13 +22,15 @@ class BaseOrder:
     def __init__(
         self,
         timestamp: pd.Timestamp,
-        side: str,
+        side: Side,
         size: float,
     ) -> None:
+        if size <= 0:
+            raise ValueError("size must be a positive number.")
         self.id = BaseOrder._id
         BaseOrder._id += 1
         self.timestamp = timestamp
-        self.side = side
+        self.side: Side = side
         self.size = size
         self.completion_time: Optional[pd.Timestamp] = None
         self.completion_status = "unexecuted"
@@ -35,14 +38,16 @@ class BaseOrder:
 
 class LimitOrder(BaseOrder):
     def __init__(
-        self, timestamp: pd.Timestamp, side: str, size: float, price: int
+        self, timestamp: pd.Timestamp, side: Side, size: float, price: int
     ) -> None:
+        if price < 0:
+            raise ValueError("price must be a non-negative number.")
         super().__init__(timestamp=timestamp, side=side, size=size)
         self.price = price
 
 
 class MarketOrder(BaseOrder):
-    def __init__(self, timestamp: pd.Timestamp, side: str, size: float) -> None:
+    def __init__(self, timestamp: pd.Timestamp, side: Side, size: float) -> None:
         super().__init__(timestamp=timestamp, side=side, size=size)
 
 
@@ -101,6 +106,12 @@ class BackTester:
                 self.archived_orders.append(order)
                 continue
 
+            if not self.validate_order(order):
+                order.completion_time = self.now_time
+                order.completion_status = "invalid"
+                self.archived_orders.append(order)
+                continue
+
             # 注文実行
             if isinstance(order, MarketOrder) or (
                 isinstance(order, LimitOrder)
@@ -111,10 +122,35 @@ class BackTester:
                 self.archived_orders.append(order)
                 continue
 
-            # 実行されなかった場合は残す
+            # 実行されなかったものは残す
             remained_orders.append(order)
 
         self.active_orders = remained_orders
+
+    def validate_order(self, order: Order) -> bool:
+        # check minimum lot
+        # TODO
+
+        # check max lot
+        # TODO
+
+        # check collateral
+        # TODO
+
+        # check max_position
+        price = self.tick.close
+        if isinstance(order, MarketOrder):
+            if order.side == "BUY":
+                price = round(price * (1 + self.slippage))
+            else:
+                price = round(price * (1 - self.slippage))
+        else:
+            price = order.price
+
+        if order.side == "BUY":
+            return self.cash - price * order.size >= 0
+        else:
+            return self.position - order.size >= 0
 
     def execute_order(self, order: Order) -> None:
         price = self.tick.close
@@ -137,7 +173,7 @@ class BackTester:
         order.completion_status = "executed"
 
     @property
-    def snapshot(self) -> pd.DataFrame:
+    def snapshots(self) -> pd.DataFrame:
         return pd.DataFrame(self._snapshots).set_index("timestamp")
 
     def take_snapshot(self) -> None:
@@ -153,6 +189,49 @@ class BackTester:
     def run_backtest(self) -> None:
         for now_time in self:
             pass
+
+    def market_buy(self, size: float) -> None:
+        order = MarketOrder(self.now_time, side="BUY", size=size)
+        self.active_orders.append(order)
+
+    def market_sell(self, size: float) -> None:
+        order = MarketOrder(self.now_time, side="SELL", size=size)
+        self.active_orders.append(order)
+
+    def limit_buy(
+        self,
+        size: float,
+        price: int,
+    ) -> None:
+        order = LimitOrder(self.now_time, side="BUY", size=size, price=price)
+        self.active_orders.append(order)
+
+    def limit_sell(
+        self,
+        size: float,
+        price: int,
+    ) -> None:
+        order = LimitOrder(self.now_time, side="SELL", size=size, price=price)
+        self.active_orders.append(order)
+
+
+class Runner:
+    def __init__(self, tester: BackTester) -> None:
+        self.tester = tester
+
+    def run(self) -> None:
+        # ランダムに売買する
+        for i, now_time in enumerate(self.tester):
+            now_price = self.tester.tick.close
+            now_cash = self.tester.cash
+            now_position = self.tester.position
+            if i % 2 == 0:
+                expected_max_size = now_cash / now_price
+                portion = random.random()
+                self.tester.market_buy(expected_max_size * portion)
+            else:
+                portion = random.random()
+                self.tester.market_sell(now_position * portion)
 
 
 if __name__ == "__main__":
@@ -173,8 +252,9 @@ if __name__ == "__main__":
     }
     df = df[list(rename_dict.keys())].rename(columns=rename_dict).set_index("timestamp")
 
-    config = {"slippage": 0, "minutes_to_expire": 60}
+    config = {"slippage": 0.001, "minutes_to_expire": 60}
     tester = BackTester(df, config)
-    tester.run_backtest()
-    snapshot = tester.snapshot
-    print(snapshot)
+    runner = Runner(tester=tester)
+    runner.run()
+    snapshots = tester.snapshots
+    print(snapshots)

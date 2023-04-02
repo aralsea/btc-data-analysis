@@ -41,6 +41,7 @@
         "${PYTHONPATH}",
     ],
     "cSpell.words": [
+        "backtest",
         "cryptowatch",
         "matplotlib",
         "pyplot",
