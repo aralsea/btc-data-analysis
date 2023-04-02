@@ -12,6 +12,7 @@ class Tick(NamedTuple):
     high: float
     low: float
     close: float
+    volume: float
 
 
 class BaseOrder:
@@ -61,11 +62,12 @@ class BackTester:
         self.ohlcv_it = ohlcv_df.itertuples(name="Tick")
 
         self.tick: Tick = Tick(
-            Index=pd.Timestamp(datetime.datetime.min),
+            Index=pd.Timestamp.min,
             open=0,
             high=0,
             low=0,
             close=0,
+            volume=0,
         )  # ダミーデータで初期化
         self.now_time: pd.Timestamp = self.tick.Index
 
@@ -85,6 +87,7 @@ class BackTester:
         self.tick = next(self.ohlcv_it)
         self.now_time = self.tick.Index
         self.handle_orders()
+        self.take_snapshot()
         return self.now_time
 
     def handle_orders(self) -> None:
@@ -146,3 +149,32 @@ class BackTester:
                 valuation=self.position * self.tick.close + self.cash,
             )
         )
+
+    def run_backtest(self) -> None:
+        for now_time in self:
+            pass
+
+
+if __name__ == "__main__":
+    # CSVデータを読み込む
+    df = pd.read_csv(
+        "../input_data/btf_periods900.csv",
+    )
+    # UNIXtimeをpandas.Timestampに変換する
+    df["CloseTime"] = pd.to_datetime(df["CloseTime"], unit="s")
+
+    rename_dict = {
+        "CloseTime": "timestamp",
+        "OpenPrice": "open",
+        "HighPrice": "high",
+        "LowPrice": "low",
+        "ClosePrice": "close",
+        "Volume": "volume",
+    }
+    df = df[list(rename_dict.keys())].rename(columns=rename_dict).set_index("timestamp")
+
+    config = {"slippage": 0, "minutes_to_expire": 60}
+    tester = BackTester(df, config)
+    tester.run_backtest()
+    snapshot = tester.snapshot
+    print(snapshot)
