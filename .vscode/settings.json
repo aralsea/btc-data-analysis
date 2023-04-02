@@ -36,15 +36,14 @@
     ],
     "black-formatter.importStrategy": "fromEnvironment",
     "isort.importStrategy": "fromEnvironment",
-    "python.analysis.extraPaths": [
-        ".",
-        "${PYTHONPATH}",
-    ],
     "cSpell.words": [
         "backtest",
         "cryptowatch",
         "matplotlib",
         "pyplot",
         "unixtime"
+    ],
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/src"
     ]
 }

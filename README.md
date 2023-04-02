@@ -11,3 +11,6 @@ pyenv local 3.11.2 \
 && pipenv install
 ```
 を実行し、vscodeでselect python interpreter→pipenvで作った環境を選択
+
+さらに
+
