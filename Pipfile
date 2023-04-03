@@ -15,6 +15,8 @@ japanize-matplotlib = "*"
 
 [dev-packages]
 ipykernel = "*"
+flake8 = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.11"
