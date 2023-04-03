@@ -1,0 +1,5 @@
+*.json
+*.ipynb
+.mypy_cache
+input_data
+notebooks

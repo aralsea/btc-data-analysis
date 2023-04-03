@@ -1,30 +1,39 @@
-import datetime
-import random
-import time
-from typing import Union
+import base64
+from pathlib import Path
+from typing import Any
 
-import numpy as np
+import functions_framework
+from google.cloud.storage import Client
 
+from library.crawler import add_data
 
-def test_strategy() -> dict[str, Union[str, float]]:
-    signals = ["buy", "sell"]
-    amounts = np.arange(0.1, 1.0, 0.1)
-    flag: dict[str, Union[str, float]] = {
-        "signal": random.choice(signals),
-        "amount": random.choice(amounts),
-    }
-    return flag
+WORK_DIR = Path("/tmp")
+BUCKET_NAME = "crypto_data192"
+STORAGE_DIR = Path("data")
+PERIODS = 900  # 15min
 
 
-if __name__ == "__main__":
-    try:
-        while True:
-            flag = test_strategy()
-            print(
-                f"{datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')}"
-                f" : {flag.get('signal')}"
-                f" {flag.get('amount'):.2f} BTC"
-            )
-            time.sleep(5)
-    except KeyboardInterrupt:
-        exit()
+@functions_framework.cloud_event
+def run(cloud_event) -> None:
+    file_name = base64.b64decode(cloud_event.data["message"]["data"]).decode()
+    update_data(file_name)
+
+
+def update_data(file_name: str) -> None:
+    fetch_current_data_from_storage(file_name=file_name)
+    add_data(periods=PERIODS, save_path=WORK_DIR / file_name)
+    upload_to_storage(file_name=file_name)
+
+
+def fetch_current_data_from_storage(file_name: str) -> None:
+    client = Client()
+    bucket = client.bucket(BUCKET_NAME)
+    blob = bucket.blob(str(STORAGE_DIR / file_name))
+    blob.download_to_filename(str(WORK_DIR / file_name))
+
+
+def upload_to_storage(file_name: str) -> None:
+    client = Client()
+    bucket = client.bucket(BUCKET_NAME)
+    blob = bucket.blob(str(STORAGE_DIR / file_name))
+    blob.upload_from_filename(str(WORK_DIR / file_name))

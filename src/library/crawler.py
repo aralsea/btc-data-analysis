@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+from pathlib import Path
 from typing import List
 
 import pandas as pd
@@ -31,7 +32,11 @@ def get_data(periods: int, before: dt.datetime, after: dt.datetime) -> List[list
     response_ = response.json()
 
     # response = {"result": {"900": [[...], [...], ]}}
-    data = response_["result"][f"{periods}"]
+
+    try:
+        data = response_["result"][f"{periods}"]
+    except Exception:
+        print(response_)
     return data
 
 
@@ -57,7 +62,7 @@ COLUMNS = [
 ]
 
 
-def get_new_data(periods: int, length: int, save_path: str) -> None:
+def get_new_data(periods: int, length: int, save_path: str | Path) -> None:
     """現在から遡ってlength件分のデータを保存する.
 
     Args:
@@ -88,7 +93,7 @@ def get_new_data(periods: int, length: int, save_path: str) -> None:
     df.to_csv(save_path, index=False)
 
 
-def add_data(periods: int, save_path: str) -> None:
+def add_data(periods: int, save_path: str | Path) -> None:
     """csvファイルに最新のデータを追加する.
 
     Args:
