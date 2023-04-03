@@ -10,6 +10,13 @@
     "python.linting.lintOnSave": true,
     "python.linting.pylintEnabled": false,
     "python.linting.mypyEnabled": true,
+    "python.linting.mypyArgs": [
+        "--follow-imports-silent",
+        "--show-column-numbers",
+        "--check-untyped-defs",
+        "--namespace-packages",
+        "--ignore-missing-imports"
+    ],
     "mypy.runUsingActiveInterpreter": true,
     "mypy.configFile": ".vscode/mypy.ini",
     "[python]": {
