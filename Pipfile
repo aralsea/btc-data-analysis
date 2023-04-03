@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-mypy = "*"
 numpy = "*"
 pandas = "*"
 requests = "*"
@@ -16,7 +15,10 @@ japanize-matplotlib = "*"
 [dev-packages]
 ipykernel = "*"
 flake8 = "*"
+black = "*"
+isort = "*"
 mypy = "*"
+types-requests = "*"
 
 [requires]
 python_version = "3.11"
