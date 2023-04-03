@@ -1,6 +1,5 @@
 import base64
 from pathlib import Path
-from typing import Any
 
 import functions_framework
 from google.cloud.storage import Client

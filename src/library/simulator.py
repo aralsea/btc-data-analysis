@@ -214,6 +214,9 @@ class BackTester:
         order = LimitOrder(self.now_time, side="SELL", size=size, price=price)
         self.active_orders.append(order)
 
+    def add_order(self, order: Order) -> None:
+        self.active_orders.append(order)
+
 
 class Runner:
     def __init__(self, tester: BackTester) -> None:
