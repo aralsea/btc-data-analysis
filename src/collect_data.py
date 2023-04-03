@@ -24,12 +24,15 @@ def get_data(periods: int, before: dt.datetime, after: dt.datetime) -> List[list
     # # afterについて, afterがちょうど16:30:00だった場合, 16:15~16:30のデータが入る.
     # UNIXに直す必要があり, timestamp()メソッドを使っている.
     response = requests.get(
-        f"https://api.cryptowat.ch/markets/bitflyer/btcjpy/ohlc?periods={periods}&before={int(before.timestamp())}&after={int(after.timestamp())}"
+        "https://api.cryptowat.ch/markets/bitflyer/btcjpy/ohlc?"
+        + f"periods={periods}"
+        + f"&before={int(before.timestamp())}"
+        + "&after={int(after.timestamp())}"
     )
-    response = response.json()
+    response_ = response.json()
 
     # response = {"result": {"900": [[...], [...], ]}}
-    data = response["result"][f"{periods}"]
+    data = response_["result"][f"{periods}"]
     return data
 
 
@@ -77,7 +80,8 @@ def get_new_data(periods: int, length: int) -> None:
     # データ取得
     data = get_data(periods, before, after)
     print(
-        f"Data from {dt.datetime.fromtimestamp(data[0][0])} to {dt.datetime.fromtimestamp(data[-1][0])} are saved"
+        f"Data from {dt.datetime.fromtimestamp(data[0][0])} to "
+        + "{dt.datetime.fromtimestamp(data[-1][0])} are saved"
     )
 
     # dataframeにして保存
@@ -106,7 +110,8 @@ def add_data(periods: int) -> None:
     data = get_data(periods, before, after)
 
     print(
-        f"Data from {dt.datetime.fromtimestamp(data[0][0])} to {dt.datetime.fromtimestamp(data[-1][0])} are saved"
+        f"Data from {dt.datetime.fromtimestamp(data[0][0])} to"
+        + "{dt.datetime.fromtimestamp(data[-1][0])} are saved"
     )
 
     # 既存のdataと結合して保存
