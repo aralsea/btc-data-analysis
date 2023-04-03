@@ -11,6 +11,8 @@ pybotters = "*"
 pandas-ta = "*"
 matplotlib = "*"
 japanize-matplotlib = "*"
+functions-framework = "*"
+google-cloud-storage = "*"
 
 [dev-packages]
 ipykernel = "*"
