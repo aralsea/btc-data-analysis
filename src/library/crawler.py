@@ -24,12 +24,14 @@ def get_data(periods: int, before: dt.datetime, after: dt.datetime) -> List[list
     # # afterについて, afterがちょうど16:30:00だった場合, 16:15~16:30のデータが入る.
     # UNIXに直す必要があり, timestamp()メソッドを使っている.
     response = requests.get(
-        f"https://api.cryptowat.ch/markets/bitflyer/btcjpy/ohlc?periods={periods}&before={int(before.timestamp())}&after={int(after.timestamp())}"
+        "https://api.cryptowat.ch/markets/bitflyer/btcjpy/"
+        + f"ohlc?periods={periods}&before={int(before.timestamp())}"
+        + f"&after={int(after.timestamp())}"
     )
-    response = response.json()
+    response_ = response.json()
 
     # response = {"result": {"900": [[...], [...], ]}}
-    data = response["result"][f"{periods}"]
+    data = response_["result"][f"{periods}"]
     return data
 
 
@@ -77,7 +79,8 @@ def get_new_data(periods: int, length: int, save_path: str) -> None:
     # データ取得
     data = get_data(periods, before, after)
     print(
-        f"Data from {dt.datetime.fromtimestamp(data[0][0])} to {dt.datetime.fromtimestamp(data[-1][0])} are saved"
+        f"Data from {dt.datetime.fromtimestamp(data[0][0])} to "
+        + f"{dt.datetime.fromtimestamp(data[-1][0])} are saved"
     )
 
     # dataframeにして保存
@@ -107,14 +110,19 @@ def add_data(periods: int, save_path: str) -> None:
         return None
 
     print(
-        f"Data from {dt.datetime.fromtimestamp(data[0][0])} to {dt.datetime.fromtimestamp(data[-1][0])} are saved"
+        f"Data from {dt.datetime.fromtimestamp(data[0][0])} to "
+        f"{dt.datetime.fromtimestamp(data[-1][0])} are saved"
     )
 
     # 既存のdataと結合して保存
     tmp_df = pd.DataFrame(data, columns=COLUMNS)
     new_df = pd.concat([old_df, tmp_df])
     new_df.to_csv(save_path, index=False)
-    print(f'Now btf_periods{periods}.csv contain data from {dt.datetime.fromtimestamp(new_df["CloseTime"].values[0])} to {dt.datetime.fromtimestamp(new_df["CloseTime"].values[-1])}')
+    print(
+        f"Now btf_periods{periods}.csv contain data "
+        + f"from {dt.datetime.fromtimestamp(new_df['CloseTime'].values[0])} "
+        + f"to {dt.datetime.fromtimestamp(new_df['CloseTime'].values[-1])}"
+    )
 
 
 if __name__ == "__main__":
