@@ -24,9 +24,10 @@ def get_data(periods: int, before: dt.datetime, after: dt.datetime) -> List[list
     # # afterについて, afterがちょうど16:30:00だった場合, 16:15~16:30のデータが入る.
     # UNIXに直す必要があり, timestamp()メソッドを使っている.
     response = requests.get(
-        "https://api.cryptowat.ch/markets/bitflyer/btcjpy/"
-        + f"ohlc?periods={periods}&before={int(before.timestamp())}"
-        + f"&after={int(after.timestamp())}"
+        "https://api.cryptowat.ch/markets/bitflyer/btcjpy/ohlc?"
+        + f"periods={periods}"
+        + f"&before={int(before.timestamp())}"
+        + "&after={int(after.timestamp())}"
     )
     response_ = response.json()
 
@@ -57,16 +58,16 @@ COLUMNS = [
 ]
 
 
-def get_new_data(periods: int, length: int, save_path: str) -> None:
+def get_new_data(periods: int, length: int) -> None:
     """現在から遡ってlength件分のデータを保存する.
 
     Args:
         periods (int): 足を指定. Ex. 15分足: 900, 日足: 86400
         length (int): データの取得件数, <=6000 (一度に6000件までしか取得できない,
         6000より大きい件数を返すよう指定してもAPIからは6000件しか返ってこない)
-        save_path (str): 保存場所.
 
     """
+    save_path = f"btf_periods{periods}.csv"
     # save_pathが既に存在している場合, 何もしない
     if os.path.exists(save_path):
         print("File already exists.")
@@ -80,7 +81,7 @@ def get_new_data(periods: int, length: int, save_path: str) -> None:
     data = get_data(periods, before, after)
     print(
         f"Data from {dt.datetime.fromtimestamp(data[0][0])} to "
-        + f"{dt.datetime.fromtimestamp(data[-1][0])} are saved"
+        + "{dt.datetime.fromtimestamp(data[-1][0])} are saved"
     )
 
     # dataframeにして保存
@@ -88,45 +89,39 @@ def get_new_data(periods: int, length: int, save_path: str) -> None:
     df.to_csv(save_path, index=False)
 
 
-def add_data(periods: int, save_path: str) -> None:
+def add_data(periods: int) -> None:
     """csvファイルに最新のデータを追加する.
 
     Args:
         periods (int): Ex. 15分足: 900, 日足: 86400
-        save_path (str): 保存場所.
 
     """
+    save_path = f"btf_periods{periods}.csv"
     old_df = pd.read_csv(save_path)
     # csvファイル上の最新の時刻(+periods)から現時点までのデータを取得
     before = dt.datetime.now()
     after = dt.datetime.fromtimestamp(old_df["CloseTime"].values[-1]) + dt.timedelta(
         seconds=periods
     )
+    print(before)
+    print(after)
 
     # データ取得
     data = get_data(periods, before, after)
-    if len(data) == 0:
-        print("There's nothing to do.")
-        return None
 
     print(
-        f"Data from {dt.datetime.fromtimestamp(data[0][0])} to "
-        f"{dt.datetime.fromtimestamp(data[-1][0])} are saved"
+        f"Data from {dt.datetime.fromtimestamp(data[0][0])} to"
+        + "{dt.datetime.fromtimestamp(data[-1][0])} are saved"
     )
 
     # 既存のdataと結合して保存
     tmp_df = pd.DataFrame(data, columns=COLUMNS)
     new_df = pd.concat([old_df, tmp_df])
     new_df.to_csv(save_path, index=False)
-    print(
-        f"Now btf_periods{periods}.csv contain data "
-        + f"from {dt.datetime.fromtimestamp(new_df['CloseTime'].values[0])} "
-        + f"to {dt.datetime.fromtimestamp(new_df['CloseTime'].values[-1])}"
-    )
 
 
 if __name__ == "__main__":
     periods = 900
-    save_path = f"../input_data/btf_periods{periods}.csv"
-    # get_new_data(periods=periods, length=6000, save_path=save_path)
-    add_data(periods=periods, save_path=save_path)
+    length = 6000
+    # get_new_data(periods=900, length=6000)
+    add_data(periods=900)
