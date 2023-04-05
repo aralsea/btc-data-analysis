@@ -131,7 +131,6 @@ def add_data(periods: int, save_path: str | Path) -> None:
 
 
 if __name__ == "__main__":
-    periods = 900
-    save_path = f"../input_data/btf_periods{periods}.csv"
-    # get_new_data(periods=periods, length=6000, save_path=save_path)
-    add_data(periods=periods, save_path=save_path)
+    for period in [60, 300, 900, 3600, 86400]:
+        save_path = f"../input_data/btf_periods{period}.csv"
+        get_new_data(periods=period, length=6000, save_path=save_path)

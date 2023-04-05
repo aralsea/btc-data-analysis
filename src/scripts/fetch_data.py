@@ -5,7 +5,7 @@ from google.cloud.storage import Client
 WORK_DIR = Path("../input_data")
 BUCKET_NAME = "crypto_data192"
 STORAGE_DIR = Path("data")
-PERIODS = 900  # 15min
+PERIODS = [60, 300, 900, 3600, 86400]
 
 
 def fetch_data_from_storage(file_name: str) -> None:
@@ -16,4 +16,6 @@ def fetch_data_from_storage(file_name: str) -> None:
 
 
 if __name__ == "__main__":
-    fetch_data_from_storage(file_name="btf_periods900.csv")
+    for period in PERIODS:
+        file_name = f"btf_periods{period}.csv"
+        fetch_data_from_storage(file_name=file_name)
