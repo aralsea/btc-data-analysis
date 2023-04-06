@@ -4,31 +4,6 @@ import pandas_ta as ta
 from library.simulator import BackTester, MarketOrder, Order
 
 
-class RunnerwithStrategy:
-    def __init__(self, tester: BackTester, strategy) -> None:
-        self.tester = tester
-        self.strategy = strategy
-
-    def run(self) -> None:
-        for i, now_time in enumerate(self.tester):
-            # 現在時刻までの情報を取得
-            now_price = self.tester.tick.close
-            now_cash = self.tester.cash
-            now_position = self.tester.position
-            active_orders = self.tester.active_orders
-            # 注文を作成
-            self.strategy.make_order(
-                df=self.tester.ohlcv_df,
-                now_time=now_time,
-                now_price=now_price,
-                now_cash=now_cash,
-                now_position=now_position,
-                active_orders=active_orders,
-            )
-            # testerに注文を渡す
-            self.strategy.add_order(now_time=now_time, tester=self.tester)
-
-
 class AbstractStrategy:
     def __init__(self):
         self.orders_to_be_added: list[Order] = []
@@ -95,3 +70,28 @@ class GcStrategy(AbstractStrategy):
                     size=size,
                 )
                 self.orders_to_be_added.append(o2)
+
+
+class RunnerWithStrategy:
+    def __init__(self, tester: BackTester, strategy: AbstractStrategy) -> None:
+        self.tester = tester
+        self.strategy = strategy
+
+    def run(self) -> None:
+        for i, now_time in enumerate(self.tester):
+            # 現在時刻までの情報を取得
+            now_price = self.tester.tick.close
+            now_cash = self.tester.cash
+            now_position = self.tester.position
+            active_orders = self.tester.active_orders
+            # 注文を作成
+            self.strategy.make_order(
+                df=self.tester.ohlcv_df,
+                now_time=now_time,
+                now_price=now_price,
+                now_cash=now_cash,
+                now_position=now_position,
+                active_orders=active_orders,
+            )
+            # testerに注文を渡す
+            self.strategy.add_order(now_time=now_time, tester=self.tester)
