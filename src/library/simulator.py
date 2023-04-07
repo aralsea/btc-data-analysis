@@ -1,10 +1,9 @@
 import random
-from typing import Any, Literal, NamedTuple
+from typing import Any, Literal, NamedTuple, Optional, Union
 
 import pandas as pd
 
 INITIAL_CASH = 1000000  # 100万円
-
 Side = Literal["BUY", "SELL"]
 
 
@@ -15,13 +14,6 @@ class Tick(NamedTuple):
     low: float
     close: float
     volume: float
-
-
-class OrderResult(NamedTuple):
-    completion_time: pd.Timestamp | None = None
-    completion_status: str = "unexecuted"
-    cash_diff: float | None = None
-    position_diff: float | None = None
 
 
 class BaseOrder:
@@ -40,20 +32,8 @@ class BaseOrder:
         self.timestamp = timestamp
         self.side: Side = side
         self.size = size
-        self.result = OrderResult()
-
-    def __eq__(self, other: object | None) -> bool:
-        if isinstance(other, BaseOrder):
-            return self.id == other.id
-        return False
-
-    @property
-    def is_executed(self) -> bool:
-        return self.result.completion_status == "executed"
-
-    @property
-    def is_unexecuted(self) -> bool:
-        return self.result.completion_status == "unexecuted"
+        self.completion_time: Optional[pd.Timestamp] = None
+        self.completion_status = "unexecuted"
 
 
 class LimitOrder(BaseOrder):
@@ -71,7 +51,7 @@ class MarketOrder(BaseOrder):
         super().__init__(timestamp=timestamp, side=side, size=size)
 
 
-Order = LimitOrder | MarketOrder
+Order = Union[LimitOrder, MarketOrder]
 
 
 class PositionSnapShot(NamedTuple):
@@ -121,12 +101,14 @@ class BackTester:
             # 有効期限が過ぎたものを削除
             time_diff = self.now_time - order.timestamp
             if time_diff.total_seconds() >= self.minutes_to_expire * 60:
-                order.result = OrderResult(self.now_time, "expired", None, None)
+                order.completion_time = self.now_time
+                order.completion_status = "expired"
                 self.archived_orders.append(order)
                 continue
 
             if not self.validate_order(order):
-                order.result = OrderResult(self.now_time, "invalid", None, None)
+                order.completion_time = self.now_time
+                order.completion_status = "invalid"
                 self.archived_orders.append(order)
                 continue
 
@@ -136,12 +118,10 @@ class BackTester:
                 and ((order.price > self.tick.low) or (order.price < self.tick.high))
             ):
                 self.execute_order(order)
-                assert order.is_executed
                 self.archived_orders.append(order)
                 continue
 
             # 実行されなかったものは残す
-            assert order.is_unexecuted
             remained_orders.append(order)
 
         self.active_orders = remained_orders
@@ -181,19 +161,15 @@ class BackTester:
         else:
             price = order.price
 
-        cash_diff: float = 0
-        position_diff: float = 0
         if order.side == "BUY":
-            cash_diff = price * order.size * (-1)
-            position_diff = order.size
+            self.position += order.size
+            self.cash -= price * order.size
         else:
-            cash_diff = price * order.size
-            position_diff = order.size * (-1)
+            self.position -= order.size
+            self.cash += price * order.size
 
-        self.cash += cash_diff
-        self.position += position_diff
-
-        order.result = OrderResult(self.now_time, "executed", cash_diff, position_diff)
+        order.completion_time = self.now_time
+        order.completion_status = "executed"
 
     @property
     def snapshots(self) -> pd.DataFrame:
@@ -209,13 +185,9 @@ class BackTester:
             )
         )
 
-    def get_current_state(self):
-        return PositionSnapShot(
-            timestamp=self.now_time,
-            cash=self.cash,
-            position=self.position,
-            valuation=self.position * self.tick.close + self.cash,
-        )
+    def run_backtest(self) -> None:
+        for now_time in self:
+            pass
 
     def market_buy(self, size: float) -> None:
         """
@@ -251,7 +223,7 @@ class BackTester:
         self.active_orders.append(order)
 
 
-class myRunner:
+class Runner:
     def __init__(self, tester: BackTester) -> None:
         self.tester = tester
 
@@ -290,7 +262,7 @@ if __name__ == "__main__":
 
     config = {"slippage": 0.001, "minutes_to_expire": 60}
     tester = BackTester(df, config)
-    runner = myRunner(tester=tester)
+    runner = Runner(tester=tester)
     runner.run()
     snapshots = tester.snapshots
     print(snapshots)
