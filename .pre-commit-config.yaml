@@ -1,0 +1,30 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+default_language_version:
+    python: python3.11
+repos:
+-   repo: local
+    hooks:
+    -   id: black
+        name: black
+        entry: pipenv run black
+        files: .*.py
+        language: python
+    -   id: flake8
+        name: flake8
+        entry: pipenv run flake8
+        files: .*.py
+        language: python
+        args: ["--extend-ignore=E203, W503, W504", "--max-line-length=120"]
+    -   id: isort
+        name: isort
+        entry: pipenv run isort
+        files: .*.py
+        language: python
+        args: ["--profile", "black"]
+    -   id: mypy
+        name: mypy
+        entry: pipenv run mypy
+        files: .*.py
+        language: python
+        args: ["--disallow-untyped-defs", "--disallow-untyped-calls", "--allow-redefinition", "--ignore-missing-imports", "--warn-redundant-casts", "--no-implicit-optional",]
