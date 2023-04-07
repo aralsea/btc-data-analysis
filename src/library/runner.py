@@ -26,9 +26,7 @@ class Runner:
                 continue
             if not self.has_position:
                 # ポジション作成
-                signal = self.strategy.get_signal(
-                    self.tester.ohlcv_df, self.tester.get_current_state()
-                )
+                signal = self.strategy.get_signal(self.tester.get_current_state())
                 if signal:
                     order = MarketOrder(now_time, signal.side, signal.size)
                     self.tester.add_order(order)
