@@ -12,5 +12,8 @@ pyenv local 3.11.2 \
 ```
 を実行し、vscodeでselect python interpreter→pipenvで作った環境を選択
 
-さらに
+さらに pre-commitの設定をする。
+```shell
+pre-commit install
+```
 
