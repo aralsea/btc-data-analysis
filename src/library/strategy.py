@@ -12,6 +12,8 @@ from library.simulator import PositionSnapShot, Side
 class Signal(NamedTuple):
     side: Side
     size: float
+    exit_time: pd.Timestamp | None = None
+    # この時刻を過ぎたら手仕舞いを始める
 
 
 class AbstractStrategy(metaclass=ABCMeta):
@@ -58,5 +60,9 @@ class GoldenCrossStrategy(AbstractStrategy):
             sma_long = ta.sma(close=tmp_df["close"], length=self.length_long).values
             if sma_short[-1] > sma_long[-1] and sma_short[-2] < sma_long[-2]:
                 # 買い注文
-                return Signal(side="BUY", size=now_cash * 0.5 / now_price)
+                return Signal(
+                    side="BUY",
+                    size=now_cash * 0.5 / now_price,
+                    exit_time=now_time + pd.Timedelta(seconds=900 * self.length_expire),
+                )
         return None
