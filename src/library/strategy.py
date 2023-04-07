@@ -66,3 +66,27 @@ class GoldenCrossStrategy(AbstractStrategy):
                     exit_time=now_time + pd.Timedelta(seconds=900 * self.length_expire),
                 )
         return None
+
+
+class FridayBuyStrategy(AbstractStrategy):
+    def __init__(
+        self,
+        df: pd.DataFrame,
+    ):
+        super().__init__(df=df)
+
+    def get_signal(self, position_snap_shot: PositionSnapShot) -> Signal | None:
+        """
+        金曜夜00:00に買って土曜00:00に売る
+        """
+        now_time = position_snap_shot.timestamp
+        now_cash = position_snap_shot.cash
+        now_price = self.df.loc[now_time, "close"]
+
+        if now_time.dayofweek == 4 and now_time.hour == 0:
+            return Signal(
+                side="BUY",
+                size=now_cash * 0.5 / now_price,
+                exit_time=now_time + pd.Timedelta(days=1),
+            )
+        return None

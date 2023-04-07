@@ -1,13 +1,12 @@
 import datetime as dt
 import os
 from pathlib import Path
-from typing import List
 
 import pandas as pd
 import requests
 
 
-def get_data(periods: int, before: dt.datetime, after: dt.datetime) -> List[list]:
+def get_data(periods: int, before: dt.datetime, after: dt.datetime) -> list[list]:
     """cryptowatchからデータを取得する.
 
     Args:
