@@ -133,8 +133,7 @@ class BackTester:
             # 注文実行
             if isinstance(order, MarketOrder) or (
                 isinstance(order, LimitOrder)
-                and (order.price > self.tick.low)
-                or (order.price < self.tick.high)
+                and ((order.price > self.tick.low) or (order.price < self.tick.high))
             ):
                 self.execute_order(order)
                 assert order.is_executed
@@ -219,10 +218,16 @@ class BackTester:
         )
 
     def market_buy(self, size: float) -> None:
+        """
+        保有cashを超える分の注文は買える最大値に変換される
+        """
         order = MarketOrder(self.now_time, side="BUY", size=size)
         self.active_orders.append(order)
 
     def market_sell(self, size: float) -> None:
+        """
+        保有cashを超える分の注文は売れる最大値に変換される
+        """
         order = MarketOrder(self.now_time, side="SELL", size=size)
         self.active_orders.append(order)
 
