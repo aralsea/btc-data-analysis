@@ -6,8 +6,6 @@ import pandas_ta as ta
 
 from library.simulator import PositionSnapShot, Side
 
-# import pandas_ta as ta
-
 
 class Signal(NamedTuple):
     side: Side
