@@ -13,6 +13,8 @@ matplotlib = "*"
 japanize-matplotlib = "*"
 functions-framework = "*"
 google-cloud-storage = "*"
+seaborn = "*"
+lightgbm = "*"
 
 [dev-packages]
 ipykernel = "*"

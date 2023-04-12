@@ -161,7 +161,10 @@ cython_debug/
 *.pyd
 __pycache__
 .pytest_cache
-**/.DS_Store
+*/.DS_Store
 
 # API files
-api_keys/hayato_api.json
+src/api_keys/hayato_api.json
+
+# large input data
+src/input_data/g-research-crypto-forecasting/
