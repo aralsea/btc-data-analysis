@@ -45,7 +45,11 @@
     "cSpell.words": [
         "backtest",
         "cryptowatch",
+        "ipynb",
+        "isort",
         "matplotlib",
+        "mypy",
+        "pipenv",
         "pyplot",
         "unixtime"
     ],
